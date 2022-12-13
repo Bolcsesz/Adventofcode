@@ -1,3 +1,4 @@
+import sys
 from collections import defaultdict
 from string import ascii_letters
 
@@ -299,9 +300,31 @@ def solve_day_9(input: str, numKnots: int):
     print(len(set(Tpath)))
 
 
-def do_monkey(monkey, starting_items, operation, test, test_true, test_false):
+def evaluate_cust_1(num1: int, num2: int, sign: str, chill_factor: int) -> int:
+    res: int
+    if sign == '+':
+        res = num1 + num2
+    elif sign == '-':
+        res = num1 - num2
+    elif sign == '*':
+        res = num1 * num2
+    return res // chill_factor
+
+
+def evaluate_cust_2(num1: int, num2: int, sign: str, test: int) -> int:
+    res: int
+    if sign == '+':
+        res = num1 + num2
+    elif sign == '-':
+        res = num1 - num2
+    elif sign == '*':
+        res = num1 * num2
+    return res - ((res // test) * test)
+
+
+def do_monkey(monkey, starting_items, operation, test, test_true, test_false, chill_factor, divider, prt1_2_indicator):
     for i in starting_items[monkey[0]]:
-        worry_level = int(eval(str(i) + str.replace(operation[monkey[0]][0], 'old', str(i)))) // 3
+        worry_level = evaluate_cust_1(i, i if operation[monkey[0]][0].split()[1] == 'old' else int( operation[monkey[0]][0].split()[1]), operation[monkey[0]][0].split()[0], chill_factor) if prt1_2_indicator == 1 else evaluate_cust_2(i, i if operation[monkey[0]][0].split()[1] == 'old' else int( operation[monkey[0]][0].split()[1]), operation[monkey[0]][0].split()[0], divider)
         monkey[1] += 1
         if worry_level % int(test[monkey[0]][0]) == 0:
             starting_items[test_true[monkey[0]][0]].append(worry_level)
@@ -309,8 +332,12 @@ def do_monkey(monkey, starting_items, operation, test, test_true, test_false):
             starting_items[test_false[monkey[0]][0]].append(worry_level)
     starting_items[monkey[0]] = []
 
-def solve_day_11(input: str):
+
+def solve_day_11(input: str, prt1_2_indicator):
     datTab = [x for x in input.strip().split('\n\n')]
+    chill_factor = 3 if prt1_2_indicator == 1 else 1
+    rounds = 20 if prt1_2_indicator == 1 else 10000
+    divider = 1
     monkey_list = []
     starting_items = {}
     operation = {}
@@ -319,22 +346,25 @@ def solve_day_11(input: str):
     test_false = {}
     for monkey in datTab:
         monkey_number = re.search(r'^Monkey.*(\d+)', monkey).group(1)
-        monkey_list.append([monkey_number,0])
+        monkey_list.append([monkey_number, 0])
         for dat in monkey.split('\n'):
-            if re.search(r'Starting items', dat) != None:
-                starting_items[monkey_number[0]] = re.findall(r'(\d+)', dat)
-            if re.search(r'Operation', dat) != None:
+            if re.search(r'Starting items', dat) is not None:
+                starting_items[monkey_number[0]] = list(map(int, re.findall(r'(\d+)', dat)))
+            if re.search(r'Operation', dat) is not None:
                 operation[monkey_number[0]] = re.findall(r'[*\/\-+]\W*(?:\d+|old)?', dat)
-            if re.search(r'Test:', dat) != None:
+            if re.search(r'Test:', dat) is not None:
                 test[monkey_number[0]] = re.findall(r'(\d+)', dat)
-            if re.search(r'If true:', dat) != None:
+                divider *= int(test[monkey_number[0]][0])
+            if re.search(r'If true:', dat) is not None:
                 test_true[monkey_number[0]] = re.findall(r'(\d+)', dat)
-            if re.search(r'If false:', dat) != None:
+            if re.search(r'If false:', dat) is not None:
                 test_false[monkey_number[0]] = re.findall(r'(\d+)', dat)
-    for i in range(20):
+    for i in range(rounds):
         for j in range(len(monkey_list)):
-            do_monkey(monkey_list[j], starting_items, operation, test, test_true, test_false)
-    print(sorted(monkey_list, key=lambda x: x[1], reverse=True)[0][1]*sorted(monkey_list, key=lambda x: x[1], reverse=True)[1][1])
+            do_monkey(monkey_list[j], starting_items, operation, test, test_true, test_false, chill_factor, divider, prt1_2_indicator)
+    print(sorted(monkey_list, key=lambda x: x[1], reverse=True)[0][1] *
+          sorted(monkey_list, key=lambda x: x[1], reverse=True)[1][1])
+
 
 if __name__ == '__main__':
     # r = get_input('5')
@@ -351,5 +381,8 @@ if __name__ == '__main__':
     # solve_day_9(get_input('9').text, 2) # task 1 # 5683 jó
     # solve_day_9(get_input('9').text, 10) # task 2 # 2396 rossz | 2571 too high | 2378 nem jó
     # solve_day_10(get_input('10').text)
-    solve_day_11(get_input('11').text)
-    # solve_day_11('Monkey 0:\n  Starting items: 79, 98\n  Operation: new = old * 19\n  Test: divisible by 23\n    If true: throw to monkey 2\n    If false: throw to monkey 3\n\nMonkey 1:\n  Starting items: 54, 65, 75, 74\n  Operation: new = old + 6\n  Test: divisible by 19\n    If true: throw to monkey 2\n    If false: throw to monkey 0\n\nMonkey 2:\n  Starting items: 79, 60, 97\n  Operation: new = old * old\n  Test: divisible by 13\n    If true: throw to monkey 1\n    If false: throw to monkey 3\n\nMonkey 3:\n  Starting items: 74\n  Operation: new = old + 3\n  Test: divisible by 17\n    If true: throw to monkey 0\n    If false: throw to monkey 1')
+    solve_day_11(get_input('11').text, 1)
+    # solve_day_11(get_input('11').text, 2)
+    solve_day_11(
+        'Monkey 0:\n  Starting items: 79, 98\n  Operation: new = old * 19\n  Test: divisible by 23\n    If true: throw to monkey 2\n    If false: throw to monkey 3\n\nMonkey 1:\n  Starting items: 54, 65, 75, 74\n  Operation: new = old + 6\n  Test: divisible by 19\n    If true: throw to monkey 2\n    If false: throw to monkey 0\n\nMonkey 2:\n  Starting items: 79, 60, 97\n  Operation: new = old * old\n  Test: divisible by 13\n    If true: throw to monkey 1\n    If false: throw to monkey 3\n\nMonkey 3:\n  Starting items: 74\n  Operation: new = old + 3\n  Test: divisible by 17\n    If true: throw to monkey 0\n    If false: throw to monkey 1',
+        2)
