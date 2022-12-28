@@ -1,6 +1,7 @@
 import sys
 from collections import defaultdict
-from string import ascii_letters
+from string import ascii_lowercase, ascii_letters
+from heapq import heappop, heappush
 
 import requests
 import re
@@ -13,12 +14,10 @@ def get_input(day: str) -> requests.Response:
     USER_AGENT = ''
     return requests.get(url, cookies={'session': SESSIONID}, headers={'User-Agent': USER_AGENT})
 
-
 def solve_day_1(input: str):
     m_lst = sorted([sum([int(y) for y in z.split('\n') if y != '']) for z in input.split('\n\n')])
     print(m_lst[-1::][0])
     print(sum(m_lst[-3::]))
-
 
 def solve_day_2(input: str):
     m_lst = [[y for y in z.split(' ')] for z in input.split('\n') if z != '']
@@ -28,12 +27,7 @@ def solve_day_2(input: str):
                   x[0]) % 65 - 1) % 3 + 1)
     print(sum([(6 if (ord(x[1]) % 87 - 1) == ((ord(x[0]) % 64) % 3) else 3 if (ord(x[1]) % 87) == (
             ord(x[0]) % 64) else 0) + ord(x[1]) % 87 for x in m_lst]))
-    print(sum([((ord(x[0]) % 65 + 1) % 3 + 1 if ord(x[1]) % 88 == 2 else ord(x[0]) % 64 if ord(x[1]) % 88 == 1 else (
-                                                                                                                            ord(
-                                                                                                                                x[
-                                                                                                                                    0]) % 65 - 1) % 3 + 1) + (
-                       (ord(x[1]) % 88) * 3) for x in m_lst]))
-
+    print(sum([((ord(x[0]) % 65 + 1) % 3 + 1 if ord(x[1]) % 88 == 2 else ord(x[0]) % 64 if ord(x[1]) % 88 == 1 else (ord(x[0]) % 65 - 1) % 3 + 1) + ((ord(x[1]) % 88) * 3) for x in m_lst]))
 
 def solve_day_3(input: str):
     sum_ = 0
@@ -45,7 +39,6 @@ def solve_day_3(input: str):
     for i in range(int(len(input.split('\n')) / 3)):
         sum_ += sum([ascii_letters.find(x[0]) + 1 for x in set(src[i * 3]) & set(src[i * 3 + 1]) & set(src[i * 3 + 2])])
     print(sum_)
-
 
 def solve_day_4(input: str):
     m_lst = [[[int(x) for x in y.split('-')] for y in z.split(',')] for z in input.split('\n') if z != '']
@@ -59,7 +52,6 @@ def solve_day_4(input: str):
             sum2_ += 1
     print(sum2_)
 
-
 def init_stacks(num: int, input: str) -> list:
     char_len = 4
     stack_list = []
@@ -71,11 +63,9 @@ def init_stacks(num: int, input: str) -> list:
                 stack_list[j].append(input[i][j * char_len + 1:j * char_len + char_len - 2])
     return stack_list
 
-
 def do_cmd(cnt: int, frm: int, to: int, stacks: list):
     for i in range(cnt):
         stacks[to - 1].append(stacks[frm - 1].pop())
-
 
 def do_cmd2(cnt: int, frm: int, to: int, stacks: list):
     tmp_stack = []
@@ -83,7 +73,6 @@ def do_cmd2(cnt: int, frm: int, to: int, stacks: list):
         tmp_stack.append(stacks[frm - 1].pop())
     for i in range(cnt):
         stacks[to - 1].append(tmp_stack.pop())
-
 
 def solve_day_5(input: str, cmd):
     li = input.split('\n\n')[0].split('\n')
@@ -96,7 +85,6 @@ def solve_day_5(input: str, cmd):
         cmd(int(res.group(1)), int(res.group(2)), int(res.group(3)), stacks)
     print(''.join([stacks[i][-1] for i in range(len(stacks))]))
 
-
 def solve_day_6(input: str, key_len: int):
     res = 0
     for i in range(len(input) - 4):
@@ -104,7 +92,6 @@ def solve_day_6(input: str, key_len: int):
             res = i + key_len
             break
     print(res)
-
 
 def solve_day_7(input: str):
     print(input)
@@ -140,7 +127,6 @@ def solve_day_7(input: str):
     print('Part 1: ', res1)
     print('Part 2: ', res2)
 
-
 def isVisible(forest: [], X: int, Y: int) -> bool:
     visibleN = True
     visibleS = True
@@ -163,7 +149,6 @@ def isVisible(forest: [], X: int, Y: int) -> bool:
             visibleE = False
             break
     return visibleN or visibleS or visibleE or visibleW
-
 
 def visDist(forest: [], X: int, Y: int) -> int:
     visdistN: int = 0
@@ -188,7 +173,6 @@ def visDist(forest: [], X: int, Y: int) -> int:
             break
     return visdistN * visdistS * visdistW * visdistE
 
-
 def solve_day_8(input: str):
     res = 0
     maxVisDist = 0
@@ -203,7 +187,6 @@ def solve_day_8(input: str):
     print(res)
     print(maxVisDist)
 
-
 def drawCRT(tick: int, x: int):
     if x <= tick % 40 <= x + 2:
         print('#', end='')
@@ -211,7 +194,6 @@ def drawCRT(tick: int, x: int):
         print('.', end='')
     if tick % 40 == 0:
         print()
-
 
 def solve_day_10(input: str):
     tick = 0
@@ -234,7 +216,6 @@ def solve_day_10(input: str):
                 res1 += tick * x
             x += int(i[1])
     print(res1)
-
 
 def moveH2T(Tarr: [], nthKnot: int, moveVect: np.ndarray, path: []):
     if nthKnot == 0:
@@ -276,7 +257,6 @@ def moveH2T(Tarr: [], nthKnot: int, moveVect: np.ndarray, path: []):
     else:
         path.append((Tarr[nthKnot + 1][0], Tarr[nthKnot + 1][1]))
 
-
 def solve_day_9(input: str, numKnots: int):
     tmp = []
     for i in range(numKnots):
@@ -299,7 +279,6 @@ def solve_day_9(input: str, numKnots: int):
                 moveH2T(Tarr, 0, [0, -1], Tpath)
     print(len(set(Tpath)))
 
-
 def evaluate_cust_1(num1: int, num2: int, sign: str, chill_factor: int) -> int:
     res: int
     if sign == '+':
@@ -309,7 +288,6 @@ def evaluate_cust_1(num1: int, num2: int, sign: str, chill_factor: int) -> int:
     elif sign == '*':
         res = num1 * num2
     return res // chill_factor
-
 
 def evaluate_cust_2(num1: int, num2: int, sign: str, test: int) -> int:
     res: int
@@ -321,7 +299,6 @@ def evaluate_cust_2(num1: int, num2: int, sign: str, test: int) -> int:
         res = num1 * num2
     return res - ((res // test) * test)
 
-
 def do_monkey(monkey, starting_items, operation, test, test_true, test_false, chill_factor, divider, prt1_2_indicator):
     for i in starting_items[monkey[0]]:
         worry_level = evaluate_cust_1(i, i if operation[monkey[0]][0].split()[1] == 'old' else int( operation[monkey[0]][0].split()[1]), operation[monkey[0]][0].split()[0], chill_factor) if prt1_2_indicator == 1 else evaluate_cust_2(i, i if operation[monkey[0]][0].split()[1] == 'old' else int( operation[monkey[0]][0].split()[1]), operation[monkey[0]][0].split()[0], divider)
@@ -331,7 +308,6 @@ def do_monkey(monkey, starting_items, operation, test, test_true, test_false, ch
         else:
             starting_items[test_false[monkey[0]][0]].append(worry_level)
     starting_items[monkey[0]] = []
-
 
 def solve_day_11(input: str, prt1_2_indicator):
     datTab = [x for x in input.strip().split('\n\n')]
@@ -365,6 +341,117 @@ def solve_day_11(input: str, prt1_2_indicator):
     print(sorted(monkey_list, key=lambda x: x[1], reverse=True)[0][1] *
           sorted(monkey_list, key=lambda x: x[1], reverse=True)[1][1])
 
+def get_start_end(matrix: [[]]):
+    S = []
+    E = []
+    for i in range(len(matrix)):
+        for j in range(len(matrix[0])):
+            if matrix[i][j] == 'S':
+                S = [i,j]
+            elif matrix[i][j] == 'E':
+                E = [i,j]
+    return S, E
+
+def height(pos: str) -> int:
+    if pos in ascii_lowercase:
+        return ascii_lowercase.index(pos)
+    elif pos == 'S':
+        return 0
+    elif pos == 'E':
+        return 25
+
+def next_step(i, j, n, m, matrix, direction):
+    for x, y in [[1, 0], [-1, 0], [0, 1], [0, -1]]:
+        next_i = i + x
+        next_j = j + y
+        if 0 <= next_i < n and 0 <= next_j < m:
+            if direction == 'up':
+                if height(matrix[next_i][next_j]) <= height(matrix[i][j]) + 1:
+                    yield next_i, next_j
+            else:
+                if height(matrix[next_i][next_j]) >= height(matrix[i][j]) - 1:
+                    yield next_i, next_j
+
+def solve_day_12(input: str, part: int):
+    print(input)
+    src = [[x for x in y] for y in input.strip().split('\n')]
+    visited = [[False for x in y] for y in input.strip().split('\n')]
+    S, E = get_start_end(src)
+    if part == 1:
+        path = [(0, S[0], S[1])]
+    elif part == 2:
+        path = [(0, E[0], E[1])]
+
+    while True:
+        steps, i, j = path.pop()
+        if not visited[i][j]:
+            visited[i][j] = True
+            if part == 1:
+                if [i, j] == E:
+                    print(steps)
+                    break
+            elif part == 2:
+                if [i, j] == S or src[i][j] == 'a':
+                    print(steps)
+                    break
+            for x, y in next_step(i, j, len(src), len(src[0]), src, 'up' if part == 1 else 'down'):
+                path.insert(0, (steps + 1, x, y))
+
+
+def compare(x, y) -> int:
+    if isinstance(x, int) and isinstance(y, int):
+        if x < y:
+            return 1
+        elif x == y:
+            return 0
+        else:
+            return -1
+
+    if isinstance(x, list) and isinstance(y, int):
+        y = [y]
+
+    if isinstance(y, list) and isinstance(x, int):
+        x = [x]
+
+    i = 0
+    while i < len(x) and i < len(y):
+        res = compare(x[i], y[i])
+        if res == 1:
+            return 1
+        if res == -1:
+            return -1
+        i += 1
+
+    if i == len(x):
+        if i == len(y):
+            return 0
+        return 1
+    elif i == len(y):
+        return -1
+    else:
+        return 0
+
+def solve_day_13(input: str, part: int):
+    res = 0
+    c = [[[2]],[[6]]]
+    r = [1,2]
+    if part == 1:
+        pairs = input.strip().split('\n\n')
+        for i, _ in enumerate(pairs):
+            p0, p1 = map(eval, _.strip().split('\n'))
+            if compare(p0, p1) == 1:
+                res += i+1
+    elif part == 2:
+        for i, p0 in enumerate(map(eval, list(filter(None, input.split('\n'))))):
+            if compare(p0, c[0]) == 1:
+                r[0] += 1
+                r[1] += 1
+            elif compare(p0, c[1]) == 1:
+                r[1] += 1
+        res = r[0]*r[1]
+
+    print(res)
+
 
 if __name__ == '__main__':
     # r = get_input('5')
@@ -378,11 +465,15 @@ if __name__ == '__main__':
     # solve_day_6(get_input('6').text, 14)
     # solve_day_7(get_input('7').text)
     # solve_day_8(get_input('8').text)
-    # solve_day_9(get_input('9').text, 2) # task 1 # 5683 jó
-    # solve_day_9(get_input('9').text, 10) # task 2 # 2396 rossz | 2571 too high | 2378 nem jó
+    # solve_day_9(get_input('9').text, 2)
+    # solve_day_9(get_input('9').text, 10)
     # solve_day_10(get_input('10').text)
-    solve_day_11(get_input('11').text, 1)
+    # solve_day_11(get_input('11').text, 1)
     # solve_day_11(get_input('11').text, 2)
-    solve_day_11(
-        'Monkey 0:\n  Starting items: 79, 98\n  Operation: new = old * 19\n  Test: divisible by 23\n    If true: throw to monkey 2\n    If false: throw to monkey 3\n\nMonkey 1:\n  Starting items: 54, 65, 75, 74\n  Operation: new = old + 6\n  Test: divisible by 19\n    If true: throw to monkey 2\n    If false: throw to monkey 0\n\nMonkey 2:\n  Starting items: 79, 60, 97\n  Operation: new = old * old\n  Test: divisible by 13\n    If true: throw to monkey 1\n    If false: throw to monkey 3\n\nMonkey 3:\n  Starting items: 74\n  Operation: new = old + 3\n  Test: divisible by 17\n    If true: throw to monkey 0\n    If false: throw to monkey 1',
-        2)
+    # solve_day_12(get_input('12').text, 1)
+    # solve_day_12(get_input('12').text, 1)
+    # solve_day_12(get_input('12').text, 2)
+    # solve_day_13(get_input('13').text, 1)
+    solve_day_13(get_input('13').text, 2)
+    # solve_day_13('[1,1,3,1,1]\n[1,1,5,1,1]\n\n[[1],[2,3,4]]\n[[1],4]\n\n[9]\n[[8,7,6]]\n\n[[4,4],4,4]\n[[4,4],4,4,4]\n\n[7,7,7,7]\n[7,7,7]\n\n[]\n[3]\n\n[[[]]]\n[[]]\n\n[1,[2,[3,[4,[5,6,7]]]],8,9]\n[1,[2,[3,[4,[5,6,0]]]],8,9]', 1)
+    # solve_day_13('[1,1,3,1,1]\n[1,1,5,1,1]\n\n[[1],[2,3,4]]\n[[1],4]\n\n[9]\n[[8,7,6]]\n\n[[4,4],4,4]\n[[4,4],4,4,4]\n\n[7,7,7,7]\n[7,7,7]\n\n[]\n[3]\n\n[[[]]]\n[[]]\n\n[1,[2,[3,[4,[5,6,7]]]],8,9]\n[1,[2,[3,[4,[5,6,0]]]],8,9]',2)
