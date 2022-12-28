@@ -397,7 +397,6 @@ def solve_day_12(input: str, part: int):
             for x, y in next_step(i, j, len(src), len(src[0]), src, 'up' if part == 1 else 'down'):
                 path.insert(0, (steps + 1, x, y))
 
-
 def compare(x, y) -> int:
     if isinstance(x, int) and isinstance(y, int):
         if x < y:
@@ -452,6 +451,60 @@ def solve_day_13(input: str, part: int):
 
     print(res)
 
+def create_map(rock_lines: list) -> set:
+    res = set()
+    for rock_line in rock_lines:
+        rock_end_coords = [list(map(int, x.split(','))) for x in rock_line.split(' -> ')]
+        for i in range(len(rock_end_coords)-1):
+            frm_x, frm_y = rock_end_coords[i]
+            to_x, to_y = rock_end_coords[i+1]
+
+            if frm_x == to_x:
+                for y in range(min(frm_y, to_y), max(frm_y, to_y) + 1):
+                    res.add((frm_x, y))
+            if frm_y == to_y:
+                for x in range(min(frm_x, to_x), max(frm_x, to_x) + 1):
+                    res.add((x, frm_y))
+    return res
+
+def drop_sand(waterfall_map: set, max_height:int, drop_point: tuple, part: int) -> bool:
+    x = drop_point[0]
+    y = drop_point[1]
+    while y < max_height:
+        # print(x, y)
+        if part == 2 and y + 1 == max_height:
+            waterfall_map.add((x, y))
+            return True
+        if (x, y + 1) not in waterfall_map:
+            y += 1
+        elif (x - 1, y + 1) not in waterfall_map:
+            x -= 1
+            y += 1
+        elif (x + 1, y + 1) not in waterfall_map:
+            x += 1
+            y += 1
+        elif drop_point in waterfall_map:
+            return False
+        else:
+            waterfall_map.add((x ,y))
+            # print('Stopped!')
+            return True
+    return False
+
+def solve_day_14(input: str, part: int):
+    rock_lines = input.strip().split('\n')
+    taken_places = create_map(rock_lines)
+    max_height = max([x[1] for x in taken_places]) + (2 if part == 2 else 0)
+    drop_point = (500, 0)
+    sand_count = 0
+    has_stopped = True
+    while has_stopped:
+        has_stopped = drop_sand(taken_places, max_height, drop_point, part)
+        if has_stopped:
+            sand_count += 1
+    print(sand_count)
+
+
 
 if __name__ == '__main__':
     # r = get_input('5')
@@ -474,6 +527,8 @@ if __name__ == '__main__':
     # solve_day_12(get_input('12').text, 1)
     # solve_day_12(get_input('12').text, 2)
     # solve_day_13(get_input('13').text, 1)
-    solve_day_13(get_input('13').text, 2)
-    # solve_day_13('[1,1,3,1,1]\n[1,1,5,1,1]\n\n[[1],[2,3,4]]\n[[1],4]\n\n[9]\n[[8,7,6]]\n\n[[4,4],4,4]\n[[4,4],4,4,4]\n\n[7,7,7,7]\n[7,7,7]\n\n[]\n[3]\n\n[[[]]]\n[[]]\n\n[1,[2,[3,[4,[5,6,7]]]],8,9]\n[1,[2,[3,[4,[5,6,0]]]],8,9]', 1)
+    # solve_day_13(get_input('13').text, 2)
+    # solve_day_14(get_input('14').text, 1)
+    solve_day_14(get_input('14').text, 2)
+    # solve_day_14('498,4 -> 498,6 -> 496,6\n503,4 -> 502,4 -> 502,9 -> 494,9', 2)
     # solve_day_13('[1,1,3,1,1]\n[1,1,5,1,1]\n\n[[1],[2,3,4]]\n[[1],4]\n\n[9]\n[[8,7,6]]\n\n[[4,4],4,4]\n[[4,4],4,4,4]\n\n[7,7,7,7]\n[7,7,7]\n\n[]\n[3]\n\n[[[]]]\n[[]]\n\n[1,[2,[3,[4,[5,6,7]]]],8,9]\n[1,[2,[3,[4,[5,6,0]]]],8,9]',2)
