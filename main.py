@@ -504,6 +504,47 @@ def solve_day_14(input: str, part: int):
             sand_count += 1
     print(sand_count)
 
+def create_map_15(inp: list):
+    sensor_map = []
+    beacon_map = []
+    for x, i in enumerate(inp):
+        sensor_map.append([int(i[2][2:-1]), int(i[3][2:-1])])
+        beacon_map.append([int(i[8][2:-1]), int(i[9][2:])])
+        sensor_map[x].append(manhattan_distance(sensor_map[x], beacon_map[x]))
+    return sensor_map, beacon_map
+
+def manhattan_distance(x: tuple, y: tuple):
+    return abs(x[0]-y[0]) + abs(x[1]-y[1])
+
+def solve_day_15(input: str, at_row: int, part: int, p_height=0, p_width=0):
+    sensor_map, beacon_map = create_map_15([x.split() for x in input.strip().split('\n')])
+    if part == 1:
+        coverage_map = set()
+        for i in range(len(sensor_map)):
+            if sensor_map[i][2] - abs(sensor_map[i][1] - at_row) > 0:
+                for j in range(sensor_map[i][0] - sensor_map[i][2] + abs(sensor_map[i][1] - at_row), sensor_map[i][0] + sensor_map[i][2] - abs(sensor_map[i][1] - at_row)):
+                    coverage_map.add(j)
+        print(len(coverage_map))
+    elif part == 2:
+        diag_plus = []
+        diag_minus = []
+        for c1, i in enumerate(sensor_map):
+            for c2, j in enumerate(sensor_map):
+                if i[0] + i[1] + i[2] + 1 == j[0] + j[1] - j[2] - 1:
+                    diag_minus.append(i[0]+i[1]+i[2]+1)
+                if i[0] - i[1] - i[2] - 1 == j[0] - j[1] + j[2] + 1:
+                    diag_plus.append(i[0] - i[1] - i[2] - 1)
+        d = abs(diag_minus[0]-diag_plus[0])//2
+        print(f'Frequency={(diag_plus[0] + d)*4000000+d}')
+
+def create_map_16(inp: list) -> list:
+    res = []
+    for i in inp:
+        res.append((i[1], i[4][5:-1], [re.sub(r'[\W]+', '', x) for x in i[9:]]))
+    return res
+
+def solve_day_16(input: str, part: int):
+    print(create_map_16([x.split() for x in input.strip().split('\n')]))
 
 
 if __name__ == '__main__':
@@ -529,6 +570,7 @@ if __name__ == '__main__':
     # solve_day_13(get_input('13').text, 1)
     # solve_day_13(get_input('13').text, 2)
     # solve_day_14(get_input('14').text, 1)
-    solve_day_14(get_input('14').text, 2)
-    # solve_day_14('498,4 -> 498,6 -> 496,6\n503,4 -> 502,4 -> 502,9 -> 494,9', 2)
-    # solve_day_13('[1,1,3,1,1]\n[1,1,5,1,1]\n\n[[1],[2,3,4]]\n[[1],4]\n\n[9]\n[[8,7,6]]\n\n[[4,4],4,4]\n[[4,4],4,4,4]\n\n[7,7,7,7]\n[7,7,7]\n\n[]\n[3]\n\n[[[]]]\n[[]]\n\n[1,[2,[3,[4,[5,6,7]]]],8,9]\n[1,[2,[3,[4,[5,6,0]]]],8,9]',2)
+    # solve_day_14(get_input('14').text, 2)
+    # solve_day_15(get_input('15').text, 2000000, 1)
+    # solve_day_15(get_input('15').text, 2000000, 2, 4000000, 4000000)
+    solve_day_16('Valve AA has flow rate=0; tunnels lead to valves DD, II, BB\nValve BB has flow rate=13; tunnels lead to valves CC, AA\nValve CC has flow rate=2; tunnels lead to valves DD, BB\nValve DD has flow rate=20; tunnels lead to valves CC, AA, EE\nValve EE has flow rate=3; tunnels lead to valves FF, DD\nValve FF has flow rate=0; tunnels lead to valves EE, GG\nValve GG has flow rate=0; tunnels lead to valves FF, HH\nValve HH has flow rate=22; tunnel leads to valve GG\nValve II has flow rate=0; tunnels lead to valves AA, JJ\nValve JJ has flow rate=21; tunnel leads to valve II', 1)
